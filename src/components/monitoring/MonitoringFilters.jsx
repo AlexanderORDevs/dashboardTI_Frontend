@@ -1,4 +1,4 @@
-import { MagnifyingGlassIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { TrashIcon } from '@heroicons/react/24/outline';
 import Label from '@/widgets/forms/label';
 import Select from '@/widgets/forms/select';
 import Option from '@/widgets/forms/option';
@@ -6,9 +6,9 @@ import Option from '@/widgets/forms/option';
 export default function MonitoringFilters({
   cases,
   agentGroups = [],
+  agents = [],
   filters,
   setters,
-  onSearch,
   onClear,
   user,
 }) {
@@ -16,39 +16,32 @@ export default function MonitoringFilters({
     ...new Set(cases.map((c) => c[key]).filter(Boolean)),
   ];
 
-  const agentOptions = [
+  const agentGroupsFromCases = [
+    ...new Set(cases.map((c) => c.assignedAgent?.call_center).filter(Boolean)),
+  ];
+
+  const filteredAgents = [
     ...new Map(
       cases
-        .filter((c) => {
-          if (!c.assignedAgent) return false;
-
-          if (
-            filters.filterAgentGroup &&
-            c.assignedAgent.call_center !== filters.filterAgentGroup
-          ) {
-            return false;
-          }
-
-          return true;
-        })
-        .map((c) => [c.assignedAgent.id, c.assignedAgent])
+        .map((c) => c.assignedAgent)
+        .filter((a) => a && a.fullname && a.fullname !== 'null')
+        .map((a) => [a.fullname, a]) // key = fullname
     ).values(),
   ];
 
   return (
-    <div className="mb-4 flex flex-wrap items-end justify-center gap-4">
+    <div className="mb-4 flex flex-wrap items-end gap-4">
+      {/* OWNER */}
       <div>
         <Label>Owner Name</Label>
-
         <input
           type="text"
           list="owner-names"
           value={filters.filterOwnerName}
           onChange={(e) => setters.setFilterOwnerName(e.target.value)}
           placeholder="All Owners"
-          className="block w-full rounded-lg border-2 border-black px-4 py-2 text-lg font-medium transition-shadow focus:shadow-[0_0_0_3px_rgba(156,163,175,0.5)] "
+          className="w-full rounded-lg border-2 border-black px-4 py-2"
         />
-
         <datalist id="owner-names">
           {[...new Set(cases.map((c) => c.ownerName).filter(Boolean))].map(
             (owner) => (
@@ -58,6 +51,7 @@ export default function MonitoringFilters({
         </datalist>
       </div>
 
+      {/* ORIGIN */}
       <div>
         <Label>Origin</Label>
         <Select
@@ -73,6 +67,7 @@ export default function MonitoringFilters({
         </Select>
       </div>
 
+      {/* TYPE */}
       <div>
         <Label>Type</Label>
         <Select
@@ -88,6 +83,7 @@ export default function MonitoringFilters({
         </Select>
       </div>
 
+      {/* SUBSTATUS */}
       <div>
         <Label>Substatus</Label>
         <Select
@@ -103,6 +99,7 @@ export default function MonitoringFilters({
         </Select>
       </div>
 
+      {/* SUPPLIER SEGMENT */}
       <div>
         <Label>Supplier Segment</Label>
         <Select
@@ -118,6 +115,7 @@ export default function MonitoringFilters({
         </Select>
       </div>
 
+      {/* AGENT GROUP */}
       {![4, 5].includes(user?.role_id) && (
         <div>
           <Label>Agent Group</Label>
@@ -127,7 +125,7 @@ export default function MonitoringFilters({
           >
             <Option value="">All</Option>
 
-            {agentGroups.map((group) => (
+            {agentGroupsFromCases.map((group) => (
               <Option key={group} value={group}>
                 {group}
               </Option>
@@ -136,6 +134,7 @@ export default function MonitoringFilters({
         </div>
       )}
 
+      {/* AGENT */}
       {![4, 5].includes(user?.role_id) && (
         <div>
           <Label>Agent</Label>
@@ -143,31 +142,26 @@ export default function MonitoringFilters({
             value={filters.filterAgentId}
             onChange={(e) => setters.setFilterAgentId(e.target.value)}
           >
-            <Option value="">All</Option>
-            <Option value="__UNASSIGNED__">Unassigned</Option>
+            <Option value="" label="All" />
+            <Option value="__UNASSIGNED__" label="Unassigned" />
 
-            {agentOptions.map((agent) => (
-              <Option key={agent.id} value={agent.id}>
-                {agent.fullname}
-              </Option>
+            {filteredAgents.map((agent) => (
+              <Option
+                key={agent.fullname}
+                value={agent.fullname}
+                label={agent.fullname}
+              />
             ))}
           </Select>
         </div>
       )}
 
-      <button
-        onClick={onSearch}
-        className="flex items-center rounded bg-[#492508] px-3 py-2 text-white"
-      >
-        <MagnifyingGlassIcon className="mr-2 h-5 w-5" />
-        Search
-      </button>
-
+      {/* CLEAR */}
       <button
         onClick={onClear}
-        className="flex items-center rounded bg-gray-300 px-3 py-2"
+        className="flex items-center gap-2 rounded bg-gray-300 px-3 py-2"
       >
-        <TrashIcon className="mr-2 h-5 w-5" />
+        <TrashIcon className="h-5 w-5" />
         Clear
       </button>
     </div>

@@ -39,7 +39,7 @@ export function LandingTemplates() {
         <Card color="white">
           <CardHeader
             variant="gradient"
-            color="gray"
+            style={{ backgroundColor: '#EEA11E' }}
             className="p-6 shadow-none"
           >
             <Typography variant="h4" color="white">

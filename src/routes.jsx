@@ -28,7 +28,7 @@ const allRoutes = [
     pages: [
       {
         icon: <HomeIcon {...icon} />,
-        name: 'dashboard',
+        name: 'Home',
         path: '/home',
         element: <Home />,
       },
@@ -46,10 +46,10 @@ const allRoutes = [
         element: <CreateRegister />,
       },
       {
-        icon: <Squares2X2Icon {...icon} />,
-        name: 'Infobit',
-        path: '/infobit',
-        element: <Infobit />,
+        icon: <ChartBarIcon {...icon} />,
+        name: 'Monitoring',
+        path: '/monitoring',
+        element: <Monitoring />,
       },
       {
         icon: <SignalIcon {...icon} />,
@@ -58,10 +58,10 @@ const allRoutes = [
         element: <ApiSends />,
       },
       {
-        icon: <ChartBarIcon {...icon} />,
-        name: 'Monitoring',
-        path: '/monitoring',
-        element: <Monitoring />,
+        icon: <Squares2X2Icon {...icon} />,
+        name: 'Infobip',
+        path: '/infobit',
+        element: <Infobit />,
       },
       {
         icon: <UserCircleIcon {...icon} />,
@@ -95,7 +95,7 @@ export const getRoutes = (user) => {
           page.name === 'Monitoring' ||
           page.name === 'Api Send' ||
           page.name === 'dashboard' ||
-          page.name === 'Infobit'
+          page.name === 'Infobip'
         );
       } else if (user?.role_id === 5) {
         return page.name === 'Monitoring' || page.name === 'dashboard';

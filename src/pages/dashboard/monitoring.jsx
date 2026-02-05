@@ -23,16 +23,27 @@ import ScaleWrapper from '@/components/ScaleWrapper';
 const getAttemptClass = (value) => {
   const num = Number(value);
   if (Number.isNaN(num)) return '';
-  if (num >= 0 && num <= 4) {
+  if (num >= 0 && num <= 2) {
     return 'bg-red-100 text-red-700';
   }
-  if (num >= 5 && num <= 9) {
+  if (num >= 3 && num <= 5) {
     return 'bg-yellow-100 text-yellow-800';
   }
-  if (num >= 10) {
+  if (num >= 6) {
     return 'bg-green-100 text-green-700';
   }
   return '';
+};
+const getAttemptColor = (value) => {
+  const num = Number(value);
+  if (Number.isNaN(num)) return null;
+  if (num >= 0 && num <= 2) return 'red';
+  if (num >= 3 && num <= 5) return 'yellow';
+  if (num >= 6) return 'green';
+  return null;
+};
+const getAttemptValue = (row, source) => {
+  return Number(row?.[source] ?? null);
 };
 
 export function Monitoring() {
@@ -57,6 +68,8 @@ export function Monitoring() {
   });
 
   const [agentGroups, setAgentGroups] = useState([]);
+  const [attemptColorFilter, setAttemptColorFilter] = useState([]);
+  const [attemptSource, setAttemptSource] = useState('attempts1');
 
   const [selectedCaseNumbers, setSelectedCaseNumbers] = useState([]);
   const [openBulkAssign, setOpenBulkAssign] = useState(false);
@@ -118,10 +131,6 @@ export function Monitoring() {
   };
 
   useEffect(() => {
-    setFilteredCases(cases);
-  }, [cases]);
-
-  useEffect(() => {
     fetchMonitoring();
   }, []);
 
@@ -139,6 +148,57 @@ export function Monitoring() {
 
     loadAgents();
   }, []);
+
+  useEffect(() => {
+    const result = cases.filter((row) => {
+      if (filterOrigin && row.origin !== filterOrigin) return false;
+      if (filterType && row.type !== filterType) return false;
+      if (filterSubstatus && row.substatus !== filterSubstatus) return false;
+      if (filterOwnerName && row.ownerName !== filterOwnerName) return false;
+      if (
+        filterSupplierSegment &&
+        row.supplierSegment !== filterSupplierSegment
+      )
+        return false;
+
+      // ✅ AGENT GROUP
+      if (filterAgentGroup) {
+        if (!row.assignedAgent) return false;
+        if (row.assignedAgent.call_center !== filterAgentGroup) return false;
+      }
+
+      // ✅ AGENT
+      if (filterAgentId) {
+        if (filterAgentId === '__UNASSIGNED__') {
+          if (row.assignedAgent) return false;
+        } else {
+          if (!row.assignedAgent) return false;
+          if (row.assignedAgent.fullname !== filterAgentId) return false;
+        }
+      }
+      if (attemptColorFilter.length > 0) {
+        const value = getAttemptValue(row, attemptSource);
+        const color = getAttemptColor(value);
+
+        if (!attemptColorFilter.includes(color)) return false;
+      }
+
+      return true;
+    });
+
+    setFilteredCases(result);
+  }, [
+    cases,
+    filterOrigin,
+    filterType,
+    filterSubstatus,
+    filterSupplierSegment,
+    filterOwnerName,
+    filterAgentGroup,
+    filterAgentId,
+    attemptColorFilter,
+    attemptSource,
+  ]);
 
   const clearFilters = () => {
     setFilterOrigin('');
@@ -214,8 +274,23 @@ export function Monitoring() {
 
     setFilteredCases(result);
   };
-
+  const toggleAttemptColor = (color) => {
+    setAttemptColorFilter((prev) =>
+      prev.includes(color) ? prev.filter((c) => c !== color) : [...prev, color]
+    );
+  };
   const colSpan = user?.role_id === 4 || user?.role_id === 5 ? 13 : 17;
+  const colorStats = useMemo(() => {
+    const stats = { red: 0, yellow: 0, green: 0 };
+
+    filteredCases.forEach((row) => {
+      const value = getAttemptValue(row, attemptSource);
+      const color = getAttemptColor(value);
+      if (color) stats[color]++;
+    });
+
+    return stats;
+  }, [filteredCases, attemptSource]);
 
   return (
     <ScaleWrapper scale={0.6} buffer={40}>
@@ -229,6 +304,7 @@ export function Monitoring() {
             <Typography variant="h4" color="white">
               Monitoring Cases
             </Typography>
+
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -280,7 +356,6 @@ export function Monitoring() {
               }}
             />
           )}
-
           <CardBody className="overflow-x-auto p-6">
             <MonitoringFilters
               cases={cases}
@@ -315,9 +390,104 @@ export function Monitoring() {
               onClear={() => setSelectedCaseNumbers([])}
             />
           )}
-
           {/* Table Attempts */}
           <CardBody className="overflow-x-auto p-6 pb-24">
+            <div className="mb-3 flex items-center justify-between text-sm text-gray-600">
+              <span>
+                Showing <strong>{filteredCases.length}</strong> of{' '}
+                <strong>{cases.length}</strong> records
+              </span>
+            </div>
+            <div className="mb-2 flex items-center gap-2 text-sm">
+              <span className="text-gray-500">Attempts:</span>
+
+              {[
+                { key: 'attempts1', label: 'Today', title: 'Attempts today' },
+                {
+                  key: 'attempts2',
+                  label: 'Yesterday',
+                  title: 'Attempts yesterday',
+                },
+                {
+                  key: 'attempts3',
+                  label: '2 Days',
+                  title: 'Attempts 2 days ago',
+                },
+                {
+                  key: 'totalAttempts',
+                  label: 'Total',
+                  title: 'Total attempts',
+                },
+              ]
+                .filter(
+                  (item) =>
+                    item.key === 'attempts1' || ![4, 5].includes(user?.role_id)
+                )
+                .map((item) => (
+                  <button
+                    key={item.key}
+                    title={item.title}
+                    onClick={() => {
+                      setAttemptSource(item.key);
+                      setAttemptColorFilter([]); // reset multi-filter
+                    }}
+                    className={`rounded px-3 py-1 font-medium transition ${
+                      attemptSource === item.key
+                        ? 'bg-gray-900 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+            </div>
+
+            <div className="mb-4 flex items-center gap-3 text-sm">
+              <span className="text-gray-500">Filter by attempts:</span>
+
+              <button
+                onClick={() => toggleAttemptColor('red')}
+                className={`rounded px-2 py-1 transition ${
+                  attemptColorFilter.includes('red')
+                    ? 'bg-red-300 text-red-900'
+                    : 'bg-red-100 text-red-700 hover:bg-red-200'
+                }`}
+              >
+                Red ({colorStats.red})
+              </button>
+
+              <button
+                onClick={() => toggleAttemptColor('yellow')}
+                className={`rounded px-2 py-1 transition ${
+                  attemptColorFilter.includes('yellow')
+                    ? 'bg-yellow-300 text-yellow-900'
+                    : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                }`}
+              >
+                Yellow ({colorStats.yellow})
+              </button>
+
+              <button
+                onClick={() => toggleAttemptColor('green')}
+                className={`rounded px-2 py-1 transition ${
+                  attemptColorFilter.includes('green')
+                    ? 'bg-green-300 text-green-900'
+                    : 'bg-green-100 text-green-700 hover:bg-green-200'
+                }`}
+              >
+                Green ({colorStats.green})
+              </button>
+
+              {attemptColorFilter.length > 0 && (
+                <button
+                  onClick={() => setAttemptColorFilter([])}
+                  className="ml-2 text-xs text-gray-500 underline hover:text-gray-700"
+                >
+                  clear
+                </button>
+              )}
+            </div>
+
             {loading ? (
               <div className="py-8 text-center">Loading data...</div>
             ) : (
@@ -351,6 +521,24 @@ export function Monitoring() {
                     >
                       Case Number
                     </th>
+                    <th
+                      className="border border-[#1A1A1A] px-4 py-2"
+                      style={{ width: '160px' }}
+                    >
+                      Full Name
+                    </th>
+                    <th
+                      className="border border-[#1A1A1A] px-4 py-2"
+                      style={{ width: '120px' }}
+                    >
+                      Phone Number
+                    </th>
+                    <th
+                      className="border border-[#1A1A1A] px-4 py-2"
+                      style={{ width: '300px' }}
+                    >
+                      Email
+                    </th>
 
                     {![4, 5].includes(user?.role_id) && (
                       <th
@@ -374,38 +562,22 @@ export function Monitoring() {
                     </th>
                     <th
                       className="border border-[#1A1A1A] px-4 py-2"
-                      style={{ width: '120px' }}
+                      style={{ width: '180px' }}
                     >
                       Type
                     </th>
-                    <th
-                      className="border border-[#1A1A1A] px-4 py-2"
-                      style={{ width: '110px' }}
-                    >
-                      Full Name
-                    </th>
-                    <th
-                      className="border border-[#1A1A1A] px-4 py-2"
-                      style={{ width: '120px' }}
-                    >
-                      Phone Number
-                    </th>
-                    <th
-                      className="border border-[#1A1A1A] px-4 py-2"
-                      style={{ width: '200px' }}
-                    >
-                      Email
-                    </th>
+
                     <th className="border border-[#1A1A1A] px-4 py-2">
                       Substatus
                     </th>
                     <th className="border border-[#1A1A1A] px-4 py-2">
-                      Assigned agent
+                      Assigned Agent
                     </th>
 
                     <th
                       onClick={() => handleSort('createdDate')}
                       className="cursor-pointer border border-[#1A1A1A] px-4 py-2 hover:bg-[#d46f1d]"
+                      style={{ width: '150px' }}
                     >
                       Created Date <br />
                       {headerDates.createdDate}
@@ -418,8 +590,9 @@ export function Monitoring() {
                     <th
                       onClick={() => handleSort('attempts1')}
                       className="cursor-pointer border border-[#1A1A1A] px-4 py-2 hover:bg-[#d46f1d]"
+                      style={{ width: '160px' }}
                     >
-                      Attemps <br />
+                      Attempts <br />
                       {headerDates.date1}
                       {sortConfig.key === 'attempts1' && (
                         <span className="ml-1">
@@ -433,7 +606,7 @@ export function Monitoring() {
                         onClick={() => handleSort('attempts2')}
                         className="cursor-pointer border border-[#1A1A1A] px-4 py-2 hover:bg-[#d46f1d]"
                       >
-                        Attemps <br />
+                        Attempts <br />
                         {headerDates.date2}
                         {sortConfig.key === 'attempts2' && (
                           <span className="ml-1">
@@ -447,7 +620,7 @@ export function Monitoring() {
                         onClick={() => handleSort('attempts3')}
                         className="cursor-pointer border border-[#1A1A1A] px-4 py-2 hover:bg-[#d46f1d]"
                       >
-                        Attemps <br />
+                        Attempts <br />
                         {headerDates.date3}
                         {sortConfig.key === 'attempts3' && (
                           <span className="ml-1">
@@ -461,7 +634,7 @@ export function Monitoring() {
                         onClick={() => handleSort('totalAttempts')}
                         className="cursor-pointer border border-[#1A1A1A] px-4 py-2 hover:bg-[#d46f1d]"
                       >
-                        Attemps Total
+                        Attempts Total
                         <br />
                         {sortConfig.key === 'totalAttempts' && (
                           <span className="ml-1">
@@ -534,6 +707,15 @@ export function Monitoring() {
                           )}
                         </td>
 
+                        <td className="border border-[#1A1A1A] px-4 py-2 text-center align-middle">
+                          {row.fullName ?? '-'}
+                        </td>
+                        <td className="border border-[#1A1A1A] px-4 py-2 text-center align-middle">
+                          {row.phoneNumber ?? '-'}
+                        </td>
+                        <td className="truncate border border-[#1A1A1A] px-4 py-2 text-center align-middle">
+                          {row.email ?? '-'}
+                        </td>
                         {![4, 5].includes(user?.role_id) && (
                           <td className="truncate border border-[#1A1A1A] px-4 py-2 text-center align-middle">
                             {row.caseId ?? '-'}
@@ -551,15 +733,6 @@ export function Monitoring() {
                         </td>
                         <td className="border border-[#1A1A1A] px-4 py-2 text-center align-middle">
                           {row.type ?? '-'}
-                        </td>
-                        <td className="border border-[#1A1A1A] px-4 py-2 text-center align-middle">
-                          {row.fullName ?? '-'}
-                        </td>
-                        <td className="border border-[#1A1A1A] px-4 py-2 text-center align-middle">
-                          {row.phoneNumber ?? '-'}
-                        </td>
-                        <td className="truncate border border-[#1A1A1A] px-4 py-2 text-center align-middle">
-                          {row.email ?? '-'}
                         </td>
                         <td className="border border-[#1A1A1A] px-4 py-2 text-center align-middle">
                           {row.substatus ?? '-'}

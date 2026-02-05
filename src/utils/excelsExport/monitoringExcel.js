@@ -2,7 +2,6 @@ import * as XLSX from 'xlsx';
 
 export function monitoringReport(data, fileName = 'monitoring.xlsx') {
   if (!Array.isArray(data) || data.length === 0) return;
-
   const formattedData = data.map((row) => ({
     'Case ID': row.caseId,
     'Case Number': row.caseNumber,
@@ -14,8 +13,8 @@ export function monitoringReport(data, fileName = 'monitoring.xlsx') {
     'Phone Number': row.phoneNumber,
     Email: row.email,
     Substatus: row.substatus,
-    Agent: row.assignedAgent?.fullname ?? '',
-    'Agent Group': row.assignedAgent?.call_center ?? '',
+    Agent: row?.assignedAgent?.fullname ?? 'Unassigned',
+    'Agent Group': row.assignedAgent?.call_center ?? 'Unassigned',
     'Attempts Today': row.attempts1,
     'Attempts Yesterday': row.attempts2,
     'Attempts 2 Days Ago': row.attempts3,

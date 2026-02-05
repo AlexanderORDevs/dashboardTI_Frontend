@@ -5,3 +5,4 @@ export * from '@/pages/dashboard/users';
 export * from '@/pages/dashboard/monitoring';
 export * from '@/pages/dashboard/apiSend';
 export * from '@/pages/dashboard/infobit';
+export * from '@/pages/dashboard/digitalSignature';
