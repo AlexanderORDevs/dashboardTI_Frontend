@@ -1,231 +1,135 @@
-import React from 'react';
-import {
-  Typography,
-  Card,
-  CardHeader,
-  CardBody,
-  IconButton,
-  Menu,
-  MenuHandler,
-  MenuList,
-  MenuItem,
-  Tooltip,
-  Progress,
-} from '@material-tailwind/react';
-import {
-  EllipsisVerticalIcon,
-  ArrowUpIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  UserGroupIcon,
-  ChartBarIcon,
-  DocumentDuplicateIcon,
-  ServerStackIcon,
-  UserCircleIcon,
-} from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
+import { Card, CardBody, Typography, Chip } from '@material-tailwind/react';
+import { summary } from '@/services/summary';
 import { useAuth } from '@/context/loginContext';
 
 export function Home() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadSummary() {
+      try {
+        const res = await summary();
+        setData(res);
+      } catch (error) {
+        console.error('Error loading summary', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadSummary();
+  }, []);
 
   if (loading) {
     return (
-      <div className="mt-12 px-4">
-        <Typography variant="h3" color="blue-gray" className="font-bold">
-          Loading...
-        </Typography>
+      <div className="flex h-[60vh] items-center justify-center">
+        <Typography>Loading dashboard...</Typography>
       </div>
     );
   }
 
+  if (!data) return null;
+
   return (
-    <div className="mt-12 px-4">
-      {/* Welcome Header */}
-      <div className="mb-8">
-        <Typography variant="h3" color="blue-gray" className="font-bold">
-          Welcome back, {loading ? 'Loading...' : user?.fullname || 'User'}!
-        </Typography>
-        <Typography variant="lead" color="gray" className="mt-2">
-          Here's an overview of your dashboard. Manage your projects, monitor
-          activities, and access key features.
-        </Typography>
+    <div className="space-y-8 p-6">
+      {/* ===== TITLE ===== */}
+      <div className="mb-8 text-black">
+        <h1 className="text-2xl font-bold">
+          Welcome{user?.fullname ? `, ${user.fullname}` : ''} 👋
+        </h1>
+        <p className="mt-1 text-sm">Platform status overview in real time.</p>
       </div>
 
-      {/* Quick Stats Cards */}
-      <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardBody className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Typography variant="h6" color="blue-gray">
-                  Active Users
-                </Typography>
-              </div>
-              <UserGroupIcon className="h-8 w-8 text-green-500" />
-            </div>
-          </CardBody>
-        </Card>
-
-        <Card>
-          <CardBody className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Typography variant="h6" color="blue-gray">
-                  UAT Tests
-                </Typography>
-              </div>
-              <ServerStackIcon className="h-8 w-8 text-blue-500" />
-            </div>
-            <Typography variant="small" color="gray" className="mt-2">
-              89% completion rate
-            </Typography>
-          </CardBody>
-        </Card>
-
-        <Card>
-          <CardBody className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Typography variant="h6" color="blue-gray">
-                  API Sends
-                </Typography>
-              </div>
-              <ChartBarIcon className="h-8 w-8 text-purple-500" />
-            </div>
-          </CardBody>
-        </Card>
-
-        <Card>
-          <CardBody className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Typography variant="h6" color="blue-gray">
-                  Monitoring
-                </Typography>
-              </div>
-              <CheckCircleIcon className="h-8 w-8 text-orange-500" />
-            </div>
-            <Typography variant="small" color="gray" className="mt-2">
-              All systems operational
-            </Typography>
-          </CardBody>
-        </Card>
+      {/* ===== CONNECTION STATUS ===== */}
+      <div className="flex gap-4">
+        <StatusCard label="Salesforce" status={data.connections.salesforce} />
+        <StatusCard label="SQL Server" status={data.connections.sqlserver} />
       </div>
 
-      {/* Recent Activities */}
-      <Card className="mb-8">
-        <CardHeader floated={false} className="m-0 h-40">
-          <div className="flex items-center justify-between p-4">
-            <Typography variant="h6" color="blue-gray">
-              Recent Activities
-            </Typography>
-            <Menu>
-              <MenuHandler>
-                <IconButton size="sm" variant="text" color="blue-gray">
-                  <EllipsisVerticalIcon className="h-5 w-5" />
-                </IconButton>
-              </MenuHandler>
-              <MenuList>
-                <MenuItem>View All</MenuItem>
-                <MenuItem>Export</MenuItem>
-              </MenuList>
-            </Menu>
-          </div>
-        </CardHeader>
-        <CardBody className="p-4">
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <UserCircleIcon className="h-8 w-8 text-gray-500" />
-              <div className="flex-1">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="font-medium"
-                >
-                  John Doe completed UAT Test #123
-                </Typography>
-                <Typography variant="small" color="gray">
-                  2 hours ago
-                </Typography>
-              </div>
-              <CheckCircleIcon className="h-5 w-5 text-green-500" />
-            </div>
-            <div className="flex items-center gap-4">
-              <UserCircleIcon className="h-8 w-8 text-gray-500" />
-              <div className="flex-1">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="font-medium"
-                >
-                  Jane Smith sent API request
-                </Typography>
-                <Typography variant="small" color="gray">
-                  4 hours ago
-                </Typography>
-              </div>
-              <ClockIcon className="h-5 w-5 text-blue-500" />
-            </div>
-            <div className="flex items-center gap-4">
-              <UserCircleIcon className="h-8 w-8 text-gray-500" />
-              <div className="flex-1">
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="font-medium"
-                >
-                  Mike Johnson updated monitoring
-                </Typography>
-                <Typography variant="small" color="gray">
-                  6 hours ago
-                </Typography>
-              </div>
-              <ArrowUpIcon className="h-5 w-5 text-purple-500" />
-            </div>
-          </div>
-        </CardBody>
-      </Card>
+      {/* ===== METRICS ===== */}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <MetricCard title="Total Users" value={data.users.total} />
+        <MetricCard title="Total Agents" value={data.agents.total} />
+        <MetricCard title="Daily Attempts" value={data.attemptsDaily.total} />
+        <MetricCard title="Assigned Cases" value={data.caseAssignments.total} />
+        <MetricCard
+          title="Infobit Messages"
+          value={data.infobitMessages.total}
+        />
+        <MetricCard
+          title="Salesforce Opportunities"
+          value={data.salesforceOpportunities.total}
+        />
+      </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <Card className="cursor-pointer transition-shadow hover:shadow-lg">
-          <CardBody className="p-6 text-center">
-            <DocumentDuplicateIcon className="mx-auto mb-4 h-12 w-12 text-blue-500" />
-            <Typography variant="h6" color="blue-gray" className="mb-2">
-              Landing Templates
-            </Typography>
-            <Typography variant="small" color="gray">
-              Create and manage landing pages
-            </Typography>
-          </CardBody>
-        </Card>
+      {/* ===== LAST RECORDS ===== */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <LastRecord
+          title="Last User Created"
+          name={data.users.last?.fullname}
+          date={data.users.last?.created_at}
+        />
 
-        <Card className="cursor-pointer transition-shadow hover:shadow-lg">
-          <CardBody className="p-6 text-center">
-            <ServerStackIcon className="mx-auto mb-4 h-12 w-12 text-green-500" />
-            <Typography variant="h6" color="blue-gray" className="mb-2">
-              UAT Tests
-            </Typography>
-            <Typography variant="small" color="gray">
-              Run and track user acceptance tests
-            </Typography>
-          </CardBody>
-        </Card>
-
-        <Card className="cursor-pointer transition-shadow hover:shadow-lg">
-          <CardBody className="p-6 text-center">
-            <ChartBarIcon className="mx-auto mb-4 h-12 w-12 text-purple-500" />
-            <Typography variant="h6" color="blue-gray" className="mb-2">
-              Monitoring
-            </Typography>
-            <Typography variant="small" color="gray">
-              Monitor system performance
-            </Typography>
-          </CardBody>
-        </Card>
+        <LastRecord
+          title="Last Agent Added"
+          name={data.agents.last?.fullname}
+          extra={data.agents.last?.call_center}
+          date={data.agents.last?.created_at}
+        />
       </div>
     </div>
   );
 }
 
-export default Home;
+/* ================= COMPONENTS ================= */
+
+function StatusCard({ label, status }) {
+  const isConnected = status === 'connected';
+
+  return (
+    <Card className="w-48">
+      <CardBody className="flex flex-col gap-2">
+        <Typography className="text-sm font-medium">{label}</Typography>
+        <Chip
+          value={isConnected ? 'Connected' : 'Disconnected'}
+          color={isConnected ? 'green' : 'red'}
+          variant="filled"
+          size="sm"
+        />
+      </CardBody>
+    </Card>
+  );
+}
+
+function MetricCard({ title, value }) {
+  return (
+    <Card>
+      <CardBody>
+        <Typography className="text-sm text-gray-600">{title}</Typography>
+        <Typography variant="h4" className="font-bold">
+          {value}
+        </Typography>
+      </CardBody>
+    </Card>
+  );
+}
+
+function LastRecord({ title, name, extra, date }) {
+  return (
+    <Card>
+      <CardBody className="space-y-1">
+        <Typography className="text-sm text-gray-600">{title}</Typography>
+        <Typography className="font-semibold">{name || '-'}</Typography>
+        {extra && (
+          <Typography className="text-xs text-gray-500">{extra}</Typography>
+        )}
+        <Typography className="text-xs text-gray-400">
+          {date ? new Date(date).toLocaleString() : '-'}
+        </Typography>
+      </CardBody>
+    </Card>
+  );
+}
