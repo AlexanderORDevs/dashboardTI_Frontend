@@ -22,7 +22,7 @@ export function Dashboard() {
         sidenavColor={sidenavColor}
       />
 
-      <div className="flex flex-1 flex-col p-4  ">
+      <div className="flex flex-1 flex-col   ">
         <div className="relative flex items-center justify-between ">
           <Topnav />
         </div>

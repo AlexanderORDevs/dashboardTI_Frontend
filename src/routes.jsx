@@ -6,6 +6,7 @@ import {
   ChartBarIcon,
   SignalIcon,
   Squares2X2Icon,
+  CodeBracketIcon,
 } from '@heroicons/react/24/solid';
 import {
   Home,
@@ -15,6 +16,7 @@ import {
   Monitoring,
   ApiSends,
   Infobit,
+  DigitalSignature,
 } from '@/pages/dashboard';
 import { SignIn } from '@/pages/auth';
 
@@ -64,6 +66,12 @@ const allRoutes = [
         element: <Infobit />,
       },
       {
+        icon: <CodeBracketIcon {...icon} />,
+        name: 'Digital Signature',
+        path: '/digitalSignature',
+        element: <DigitalSignature />,
+      },
+      {
         icon: <UserCircleIcon {...icon} />,
         name: 'Users',
         path: '/users',
@@ -94,12 +102,15 @@ export const getRoutes = (user) => {
         return (
           page.name === 'Monitoring' ||
           page.name === 'Api Send' ||
-          page.name === 'dashboard' ||
+          page.name === 'Home' ||
           page.name === 'Infobip'
         );
       } else if (user?.role_id === 5) {
-        return page.name === 'Monitoring' || page.name === 'dashboard';
+        return page.name === 'Monitoring' || page.name === 'Home';
+      } else if (user?.role_id === 6) {
+        return page.name === 'Digital Signature' || page.name === 'Home';
       }
+
       return true;
     }),
   }));
