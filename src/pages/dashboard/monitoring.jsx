@@ -55,7 +55,7 @@ export function Monitoring() {
 
   const [filterOrigin, setFilterOrigin] = useState('');
   const [filterType, setFilterType] = useState('');
-  const [filterSubstatus, setFilterSubstatus] = useState('');
+  const [filterSubstatus, setFilterSubstatus] = useState([]);
   const [filterSupplierSegment, setFilterSupplierSegment] = useState('');
   const [filterAgentId, setFilterAgentId] = useState('');
   const [filterAgentGroup, setFilterAgentGroup] = useState('');
@@ -153,7 +153,13 @@ export function Monitoring() {
     const result = cases.filter((row) => {
       if (filterOrigin && row.origin !== filterOrigin) return false;
       if (filterType && row.type !== filterType) return false;
-      if (filterSubstatus && row.substatus !== filterSubstatus) return false;
+      if (
+        filterSubstatus.length > 0 &&
+        !filterSubstatus.includes(row.substatus)
+      ) {
+        return false;
+      }
+
       if (filterOwnerName && row.ownerName !== filterOwnerName) return false;
       if (
         filterSupplierSegment &&
@@ -356,7 +362,7 @@ export function Monitoring() {
               }}
             />
           )}
-          <CardBody className="overflow-x-auto p-6">
+          <CardBody className="relative overflow-visible p-6">
             <MonitoringFilters
               cases={cases}
               agentGroups={agentGroups}

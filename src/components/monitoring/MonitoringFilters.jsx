@@ -2,6 +2,7 @@ import { TrashIcon } from '@heroicons/react/24/outline';
 import Label from '@/widgets/forms/label';
 import Select from '@/widgets/forms/select';
 import Option from '@/widgets/forms/option';
+import SubstatusMultiSelect from './SubstatusMultiSelect';
 
 export default function MonitoringFilters({
   cases,
@@ -84,20 +85,11 @@ export default function MonitoringFilters({
       </div>
 
       {/* SUBSTATUS */}
-      <div>
-        <Label>Substatus</Label>
-        <Select
-          value={filters.filterSubstatus}
-          onChange={(e) => setters.setFilterSubstatus(e.target.value)}
-        >
-          <Option value="">All</Option>
-          {uniqueValues('substatus').map((v) => (
-            <Option key={v} value={v}>
-              {v}
-            </Option>
-          ))}
-        </Select>
-      </div>
+      <SubstatusMultiSelect
+        options={uniqueValues('substatus')}
+        value={filters.filterSubstatus}
+        onChange={setters.setFilterSubstatus}
+      />
 
       {/* SUPPLIER SEGMENT */}
       <div>
