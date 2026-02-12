@@ -60,6 +60,7 @@ export function Monitoring() {
   const [filterAgentId, setFilterAgentId] = useState('');
   const [filterAgentGroup, setFilterAgentGroup] = useState('');
   const [agents, setAgents] = useState([]);
+  const [lastUpdated, setLastUpdated] = useState(null);
   const [filterOwnerName, setFilterOwnerName] = useState('');
 
   const [sortConfig, setSortConfig] = useState({
@@ -74,8 +75,10 @@ export function Monitoring() {
   const [selectedCaseNumbers, setSelectedCaseNumbers] = useState([]);
   const [openBulkAssign, setOpenBulkAssign] = useState(false);
 
-  const fetchMonitoring = async () => {
-    setLoading(true);
+  const fetchMonitoring = async (isAuto = false) => {
+    if (!isAuto) {
+      setLoading(true);
+    }
     setSelectedCaseNumbers([]);
     setLastSelectedIndex(null);
     setOpenBulkAssign(false);
@@ -83,6 +86,7 @@ export function Monitoring() {
       const { data } = await monitoringAttemps();
       setCases(Array.isArray(data) ? data : []);
       setSelectedCaseNumbers([]);
+      setLastUpdated(new Date());
     } catch (error) {
       console.error('Error fetching monitoring:', error);
       CustomSwal.fire({
@@ -206,6 +210,17 @@ export function Monitoring() {
     attemptSource,
   ]);
 
+  useEffect(() => {
+    const interval = setInterval(
+      () => {
+        fetchMonitoring(true);
+      },
+      10 * 60 * 1000
+    );
+
+    return () => clearInterval(interval);
+  }, []);
+
   const clearFilters = () => {
     setFilterOrigin('');
     setFilterType('');
@@ -285,7 +300,10 @@ export function Monitoring() {
       prev.includes(color) ? prev.filter((c) => c !== color) : [...prev, color]
     );
   };
-  const colSpan = user?.role_id === 4 || user?.role_id === 5 ? 13 : 17;
+  const isRestricted = [4, 5].includes(user?.role_id);
+
+  const colSpan = isRestricted ? 12 : 16;
+
   const colorStats = useMemo(() => {
     const stats = { red: 0, yellow: 0, green: 0 };
 
@@ -307,14 +325,22 @@ export function Monitoring() {
             style={{ backgroundColor: '#EEA11E' }}
             className="flex items-center justify-between p-6"
           >
-            <Typography variant="h4" color="white">
-              Monitoring Cases
-            </Typography>
+            <div className="flex flex-col">
+              <Typography variant="h4" color="white">
+                Monitoring Cases
+              </Typography>
+
+              {lastUpdated && (
+                <span className="text-lg text-orange-100 opacity-90">
+                  Last updated {lastUpdated.toLocaleTimeString()}
+                </span>
+              )}
+            </div>
 
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={fetchMonitoring}
+                onClick={() => fetchMonitoring(false)}
                 disabled={loading}
                 className={`flex items-center gap-2 rounded px-3 py-1 text-white transition
     ${
@@ -325,9 +351,9 @@ export function Monitoring() {
   `}
               >
                 <ArrowPathIcon
-                  className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`}
+                  className={`flex h-5 w-5 ${loading ? 'animate-spin' : ''}`}
                 />
-                {loading ? 'Refreshing...' : 'Refresh'}
+                {loading ? 'Updating...' : 'Refresh'}
               </button>
 
               <button
@@ -435,7 +461,7 @@ export function Monitoring() {
                     title={item.title}
                     onClick={() => {
                       setAttemptSource(item.key);
-                      setAttemptColorFilter([]); // reset multi-filter
+                      setAttemptColorFilter([]);
                     }}
                     className={`rounded px-3 py-1 font-medium transition ${
                       attemptSource === item.key

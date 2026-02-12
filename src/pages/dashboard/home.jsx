@@ -8,7 +8,14 @@ export function Home() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const isRestrictedRole = user?.role_id === 4 || user?.role_id === 5;
+
   useEffect(() => {
+    if (isRestrictedRole) {
+      setLoading(false);
+      return;
+    }
+
     async function loadSummary() {
       try {
         const res = await summary();
@@ -21,7 +28,7 @@ export function Home() {
     }
 
     loadSummary();
-  }, []);
+  }, [isRestrictedRole]);
 
   if (loading) {
     return (
@@ -31,6 +38,10 @@ export function Home() {
     );
   }
 
+  if (isRestrictedRole) {
+    return <BasicHome user={user} />;
+  }
+
   if (!data) return null;
 
   return (
@@ -38,7 +49,7 @@ export function Home() {
       {/* ===== TITLE ===== */}
       <div className="mb-8 text-black">
         <h1 className="text-2xl font-bold">
-          Welcome{user?.fullname ? `, ${user.fullname}` : ''} 👋
+          Welcome{user?.fullname ? `, ${user.fullname}` : ''}
         </h1>
         <p className="mt-1 text-sm">Platform status overview in real time.</p>
       </div>
@@ -53,7 +64,10 @@ export function Home() {
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <MetricCard title="Total Users" value={data.users.total} />
         <MetricCard title="Total Agents" value={data.agents.total} />
-        <MetricCard title="Daily Attempts" value={data.attemptsDaily.total} />
+        <MetricCard
+          title="Average Daily Attempts"
+          value={data.attemptsDaily.total}
+        />
         <MetricCard title="Assigned Cases" value={data.caseAssignments.total} />
         <MetricCard
           title="Infobit Messages"
@@ -70,6 +84,7 @@ export function Home() {
         <LastRecord
           title="Last User Created"
           name={data.users.last?.fullname}
+          extra={data.users.last?.Role.name}
           date={data.users.last?.created_at}
         />
 
@@ -131,5 +146,26 @@ function LastRecord({ title, name, extra, date }) {
         </Typography>
       </CardBody>
     </Card>
+  );
+}
+
+function BasicHome({ user }) {
+  return (
+    <div className="flex min-h-[70vh] flex-col items-center justify-center px-6 text-center">
+      <img
+        src="https://illustrations.popsy.co/gray/work-from-home.svg"
+        alt="Welcome"
+        className="mb-8 w-72"
+      />
+
+      <h1 className="mb-3 text-3xl font-bold">
+        Welcome{user?.fullname ? `, ${user.fullname}` : ''} 👋
+      </h1>
+
+      <p className="max-w-md text-gray-600">
+        We're excited to have you here. Everything is set up and ready — explore
+        your workspace and make the most of your experience.
+      </p>
+    </div>
   );
 }
