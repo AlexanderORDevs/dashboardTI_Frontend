@@ -53,12 +53,13 @@ export function Monitoring() {
   const [lastSelectedIndex, setLastSelectedIndex] = useState(null);
   const [filteredCases, setFilteredCases] = useState([]);
 
-  const [filterOrigin, setFilterOrigin] = useState('');
-  const [filterType, setFilterType] = useState('');
   const [filterSubstatus, setFilterSubstatus] = useState([]);
-  const [filterSupplierSegment, setFilterSupplierSegment] = useState('');
-  const [filterAgentId, setFilterAgentId] = useState('');
-  const [filterAgentGroup, setFilterAgentGroup] = useState('');
+  const [filterOrigin, setFilterOrigin] = useState([]);
+  const [filterType, setFilterType] = useState([]);
+  const [filterSupplierSegment, setFilterSupplierSegment] = useState([]);
+  const [filterAgentId, setFilterAgentId] = useState([]);
+  const [filterAgentGroup, setFilterAgentGroup] = useState([]);
+
   const [agents, setAgents] = useState([]);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [filterOwnerName, setFilterOwnerName] = useState('');
@@ -112,14 +113,21 @@ export function Monitoring() {
         return Array.from(new Set([...prev, ...rangeCases]));
       }
 
-      if (prev.includes(caseNumber)) {
-        return prev.filter((id) => id !== caseNumber);
+      if (event?.ctrlKey || event?.metaKey) {
+        if (prev.includes(caseNumber)) {
+          return prev.filter((id) => id !== caseNumber);
+        }
+        return [...prev, caseNumber];
       }
 
-      return [...prev, caseNumber];
+      setLastSelectedIndex(index);
+      return [caseNumber];
     });
 
-    setLastSelectedIndex(index);
+    // Solo actualizamos el índice base si NO es ctrl
+    if (!event?.ctrlKey && !event?.metaKey) {
+      setLastSelectedIndex(index);
+    }
   };
 
   const handleSort = (key) => {
@@ -155,8 +163,14 @@ export function Monitoring() {
 
   useEffect(() => {
     const result = cases.filter((row) => {
-      if (filterOrigin && row.origin !== filterOrigin) return false;
-      if (filterType && row.type !== filterType) return false;
+      if (filterOrigin.length > 0 && !filterOrigin.includes(row.origin)) {
+        return false;
+      }
+
+      if (filterType.length > 0 && !filterType.includes(row.type)) {
+        return false;
+      }
+
       if (
         filterSubstatus.length > 0 &&
         !filterSubstatus.includes(row.substatus)
@@ -164,28 +178,37 @@ export function Monitoring() {
         return false;
       }
 
-      if (filterOwnerName && row.ownerName !== filterOwnerName) return false;
       if (
-        filterSupplierSegment &&
-        row.supplierSegment !== filterSupplierSegment
-      )
+        filterOwnerName.length > 0 &&
+        !filterOwnerName.includes(row.ownerName)
+      ) {
         return false;
+      }
+
+      if (
+        filterSupplierSegment.length > 0 &&
+        !filterSupplierSegment.includes(row.supplierSegment)
+      ) {
+        return false;
+      }
 
       // ✅ AGENT GROUP
-      if (filterAgentGroup) {
+      if (filterAgentGroup.length > 0) {
         if (!row.assignedAgent) return false;
-        if (row.assignedAgent.call_center !== filterAgentGroup) return false;
+        if (!filterAgentGroup.includes(row.assignedAgent.call_center))
+          return false;
       }
 
       // ✅ AGENT
-      if (filterAgentId) {
-        if (filterAgentId === '__UNASSIGNED__') {
+      if (filterAgentId.length > 0) {
+        if (filterAgentId.includes('Unassigned')) {
           if (row.assignedAgent) return false;
         } else {
           if (!row.assignedAgent) return false;
-          if (row.assignedAgent.fullname !== filterAgentId) return false;
+          if (!filterAgentId.includes(row.assignedAgent.fullname)) return false;
         }
       }
+
       if (attemptColorFilter.length > 0) {
         const value = getAttemptValue(row, attemptSource);
         const color = getAttemptColor(value);
@@ -222,14 +245,13 @@ export function Monitoring() {
   }, []);
 
   const clearFilters = () => {
-    setFilterOrigin('');
-    setFilterType('');
-    setFilterSubstatus('');
-    setFilterSupplierSegment('');
-    setFilterAgentGroup('');
-    setFilterAgentId('');
+    setFilterOrigin([]);
+    setFilterType([]);
+    setFilterSubstatus([]);
+    setFilterSupplierSegment([]);
+    setFilterAgentGroup([]);
+    setFilterAgentId([]);
     setFilterOwnerName('');
-    setFilteredCases(cases);
   };
 
   const headerDates = useMemo(() => {
@@ -694,13 +716,14 @@ export function Monitoring() {
                         className={`
     relative
     text-center
-    align-middle transition-colors  
+    align-middle
+    transition-colors
     ${selectedCaseNumbers.includes(row.caseNumber) ? 'bg-indigo-100' : ''}
   `}
                       >
                         {![4, 5].includes(user?.role_id) && (
                           <td
-                            className=" cursor-pointer border border-[#1A1A1A] bg-inherit px-2 py-2 text-center align-middle"
+                            className="cursor-pointer border border-[#1A1A1A] bg-inherit px-2 py-2 text-center align-middle"
                             onClick={(e) =>
                               toggleCaseSelection(row.caseNumber, idx, e)
                             }
@@ -710,10 +733,8 @@ export function Monitoring() {
                               checked={selectedCaseNumbers.includes(
                                 row.caseNumber
                               )}
-                              onClick={(e) => e.stopPropagation()}
-                              onChange={(e) =>
-                                toggleCaseSelection(row.caseNumber, idx, e)
-                              }
+                              readOnly
+                              className="pointer-events-none"
                             />
                           </td>
                         )}

@@ -2,6 +2,7 @@ import { TrashIcon } from '@heroicons/react/24/outline';
 import Label from '@/widgets/forms/label';
 import Select from '@/widgets/forms/select';
 import Option from '@/widgets/forms/option';
+import MultiSelectFilter from '@/components/monitoring/MultiSelectFilter';
 import SubstatusMultiSelect from './SubstatusMultiSelect';
 
 export default function MonitoringFilters({
@@ -33,56 +34,28 @@ export default function MonitoringFilters({
   return (
     <div className="mb-4 flex flex-wrap items-end gap-4">
       {/* OWNER */}
-      <div>
-        <Label>Owner Name</Label>
-        <input
-          type="text"
-          list="owner-names"
-          value={filters.filterOwnerName}
-          onChange={(e) => setters.setFilterOwnerName(e.target.value)}
-          placeholder="All Owners"
-          className="w-full rounded-lg border-2 border-black px-4 py-2"
-        />
-        <datalist id="owner-names">
-          {[...new Set(cases.map((c) => c.ownerName).filter(Boolean))].map(
-            (owner) => (
-              <option key={owner} value={owner} />
-            )
-          )}
-        </datalist>
-      </div>
+      <MultiSelectFilter
+        label="Owner Name"
+        options={[...new Set(cases.map((c) => c.ownerName).filter(Boolean))]}
+        value={filters.filterOwnerName}
+        onChange={setters.setFilterOwnerName}
+      />
 
       {/* ORIGIN */}
-      <div>
-        <Label>Origin</Label>
-        <Select
-          value={filters.filterOrigin}
-          onChange={(e) => setters.setFilterOrigin(e.target.value)}
-        >
-          <Option value="">All</Option>
-          {uniqueValues('origin').map((v) => (
-            <Option key={v} value={v}>
-              {v}
-            </Option>
-          ))}
-        </Select>
-      </div>
+      <MultiSelectFilter
+        label="Origin"
+        options={uniqueValues('origin')}
+        value={filters.filterOrigin}
+        onChange={setters.setFilterOrigin}
+      />
 
       {/* TYPE */}
-      <div>
-        <Label>Type</Label>
-        <Select
-          value={filters.filterType}
-          onChange={(e) => setters.setFilterType(e.target.value)}
-        >
-          <Option value="">All</Option>
-          {uniqueValues('type').map((v) => (
-            <Option key={v} value={v}>
-              {v}
-            </Option>
-          ))}
-        </Select>
-      </div>
+      <MultiSelectFilter
+        label="Type"
+        options={uniqueValues('type')}
+        value={filters.filterType}
+        onChange={setters.setFilterType}
+      />
 
       {/* SUBSTATUS */}
       <SubstatusMultiSelect
@@ -92,60 +65,31 @@ export default function MonitoringFilters({
       />
 
       {/* SUPPLIER SEGMENT */}
-      <div>
-        <Label>Supplier Segment</Label>
-        <Select
-          value={filters.filterSupplierSegment}
-          onChange={(e) => setters.setFilterSupplierSegment(e.target.value)}
-        >
-          <Option value="">All</Option>
-          {uniqueValues('supplierSegment').map((v) => (
-            <Option key={v} value={v}>
-              {v}
-            </Option>
-          ))}
-        </Select>
-      </div>
+      <MultiSelectFilter
+        label="Supplier Segment"
+        options={uniqueValues('supplierSegment')}
+        value={filters.filterSupplierSegment}
+        onChange={setters.setFilterSupplierSegment}
+      />
 
       {/* AGENT GROUP */}
       {![4, 5].includes(user?.role_id) && (
-        <div>
-          <Label>Agent Group</Label>
-          <Select
-            value={filters.filterAgentGroup}
-            onChange={(e) => setters.setFilterAgentGroup(e.target.value)}
-          >
-            <Option value="">All</Option>
-
-            {agentGroupsFromCases.map((group) => (
-              <Option key={group} value={group}>
-                {group}
-              </Option>
-            ))}
-          </Select>
-        </div>
+        <MultiSelectFilter
+          label="Agent Group"
+          options={agentGroupsFromCases}
+          value={filters.filterAgentGroup}
+          onChange={setters.setFilterAgentGroup}
+        />
       )}
 
       {/* AGENT */}
       {![4, 5].includes(user?.role_id) && (
-        <div>
-          <Label>Agent</Label>
-          <Select
-            value={filters.filterAgentId}
-            onChange={(e) => setters.setFilterAgentId(e.target.value)}
-          >
-            <Option value="" label="All" />
-            <Option value="__UNASSIGNED__" label="Unassigned" />
-
-            {filteredAgents.map((agent) => (
-              <Option
-                key={agent.fullname}
-                value={agent.fullname}
-                label={agent.fullname}
-              />
-            ))}
-          </Select>
-        </div>
+        <MultiSelectFilter
+          label="Agent"
+          options={['Unassigned', ...filteredAgents.map((a) => a.fullname)]}
+          value={filters.filterAgentId}
+          onChange={setters.setFilterAgentId}
+        />
       )}
 
       {/* CLEAR */}
