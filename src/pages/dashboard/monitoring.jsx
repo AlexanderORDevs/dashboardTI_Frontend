@@ -106,7 +106,7 @@ export function Monitoring() {
         const start = Math.min(lastSelectedIndex, index);
         const end = Math.max(lastSelectedIndex, index);
 
-        const rangeCases = filteredCases
+        const rangeCases = sortedCases
           .slice(start, end + 1)
           .map((c) => c.caseNumber);
 
@@ -556,13 +556,13 @@ export function Monitoring() {
                         <input
                           type="checkbox"
                           checked={
-                            filteredCases.length > 0 &&
-                            selectedCaseNumbers.length === filteredCases.length
+                            sortedCases.length > 0 &&
+                            selectedCaseNumbers.length === sortedCases.length
                           }
                           onChange={(e) =>
                             setSelectedCaseNumbers(
                               e.target.checked
-                                ? filteredCases.map((c) => c.caseNumber)
+                                ? sortedCases.map((c) => c.caseNumber)
                                 : []
                             )
                           }
@@ -700,7 +700,7 @@ export function Monitoring() {
                   </tr>
                 </thead>
                 <tbody>
-                  {cases.length === 0 ? (
+                  {sortedCases.length === 0 ? (
                     <tr>
                       <td
                         colSpan={colSpan}
