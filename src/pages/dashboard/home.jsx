@@ -11,7 +11,8 @@ export function Home() {
   const [loading, setLoading] = useState(true);
   const [assignments, setAssignments] = useState([]);
 
-  const isRestrictedRole = user?.role_id === 4 || user?.role_id === 5;
+  const restrictedRoles = [4, 5, 7];
+  const isRestrictedRole = restrictedRoles.includes(user?.role_id);
 
   useEffect(() => {
     if (isRestrictedRole) {
@@ -55,29 +56,6 @@ export function Home() {
     });
 
     return grouped;
-  }, [assignments]);
-
-  const assignmentsByAgent = useMemo(() => {
-    const grouped = {};
-
-    assignments
-      .filter((a) => !a.unassigned_at)
-      .forEach((item) => {
-        const agentName = item.agent?.fullname || 'Unassigned';
-        const callCenter = item.agent?.call_center || '-';
-
-        if (!grouped[agentName]) {
-          grouped[agentName] = {
-            fullname: agentName,
-            call_center: callCenter,
-            total: 0,
-          };
-        }
-
-        grouped[agentName].total += 1;
-      });
-
-    return Object.values(grouped).sort((a, b) => b.total - a.total);
   }, [assignments]);
 
   if (loading) {

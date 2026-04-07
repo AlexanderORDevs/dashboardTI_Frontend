@@ -8,7 +8,6 @@ import {
 } from '@/components/signature';
 import { validateForm } from '../../hooks/validateDigital';
 import { submitFormData } from '../../services/digitalSignature/generateDigital';
-import ScaleWrapper from '@/components/ScaleWrapper';
 
 const companyDesigns = {
   IMG: {
@@ -188,7 +187,7 @@ export function DigitalSignature() {
   }[selectedCompany];
 
   return (
-    <div className="font-poppins bg-primary-red-500 bg-intro-mobile lg:bg-intro-desktop bg-desktop-intro flex min-h-screen flex-col items-center overflow-hidden p-6 lg:min-h-screen ">
+    <div className="bg-desktop-intro flex min-h-screen flex-col items-center overflow-hidden bg-primary-red-500 bg-intro-mobile p-6 font-poppins lg:min-h-screen lg:bg-intro-desktop ">
       <div className=" py-20 lg:flex ">
         <div className="container flex flex-grow">
           <div className=" flex h-full flex-wrap">
@@ -205,7 +204,7 @@ export function DigitalSignature() {
             </div>
             <div className="flex w-full items-center px-3 lg:w-1/2">
               <div className="w-full space-y-8">
-                <h2 className="bg-accent-blue-500 shadow-hard-gray relative z-30 rounded-lg py-4 text-center text-white">
+                <h2 className="relative z-30 rounded-lg bg-accent-blue-500 py-4 text-center text-white shadow-hard-gray">
                   <span className="relative z-30 font-semibold">
                     Transform Your Data
                   </span>
@@ -232,7 +231,7 @@ export function DigitalSignature() {
                 </div>
 
                 <form
-                  className="shadow-hard-gray rounded-lg bg-white"
+                  className="rounded-lg bg-white shadow-hard-gray"
                   onSubmit={handleSubmit}
                 >
                   <div className="space-y-6 p-8 text-sm">
@@ -248,12 +247,12 @@ export function DigitalSignature() {
                     <input
                       type="submit"
                       value="Download digital signature"
-                      className="bg-primary-green-500 hover:bg-primary-green-600 active:bg-primary-green-700 border-primary-green-600 w-full cursor-pointer rounded-lg border-b-[6px] py-4 text-center font-semibold uppercase text-white"
+                      className="w-full cursor-pointer rounded-lg border-b-[6px] border-primary-green-600 bg-primary-green-500 py-4 text-center font-semibold uppercase text-white hover:bg-primary-green-600 active:bg-primary-green-700"
                     />
-                    <p className="text-neutral-grayish-blue-500 text-center text-[12px]">
+                    <p className="text-center text-[12px] text-neutral-grayish-blue-500">
                       Privacy policy and consumer protection |
                       <a
-                        className="text-primary-red-500 ml-1 font-semibold"
+                        className="ml-1 font-semibold text-primary-red-500"
                         href="/"
                         onClick={(e) => e.preventDefault()}
                       >

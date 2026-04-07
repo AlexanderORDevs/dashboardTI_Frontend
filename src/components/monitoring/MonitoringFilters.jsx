@@ -25,7 +25,7 @@ export default function MonitoringFilters({
       cases
         .map((c) => c.assignedAgent)
         .filter((a) => a && a.fullname && a.fullname !== 'null')
-        .map((a) => [a.fullname, a]) // key = fullname
+        .map((a) => [a.fullname, a])
     ).values(),
   ];
 
@@ -71,7 +71,7 @@ export default function MonitoringFilters({
       />
 
       {/* AGENT GROUP */}
-      {![4, 5].includes(user?.role_id) && (
+      {![4, 5, 7].includes(user?.role_id) && (
         <MultiSelectFilter
           label="Agent Group"
           options={agentGroupsFromCases}
@@ -81,7 +81,7 @@ export default function MonitoringFilters({
       )}
 
       {/* AGENT */}
-      {![4, 5].includes(user?.role_id) && (
+      {![4, 5, 7].includes(user?.role_id) && (
         <MultiSelectFilter
           label="Agent"
           options={['Unassigned', ...filteredAgents.map((a) => a.fullname)]}

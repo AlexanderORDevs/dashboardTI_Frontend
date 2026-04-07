@@ -100,7 +100,6 @@ export function Monitoring() {
   const [selectedCaseNumbers, setSelectedCaseNumbers] = useState([]);
   const [openBulkAssign, setOpenBulkAssign] = useState(false);
 
-  // Estados para el modal de búsqueda de asignaciones
   const [openSearchAssignments, setOpenSearchAssignments] = useState(false);
   const [searchFilters, setSearchFilters] = useState({
     startDate: getPeruDateString(),
@@ -271,6 +270,11 @@ export function Monitoring() {
         if (!attemptColorFilter.includes(color)) return false;
       }
 
+      if (user?.role_id === 7) {
+        if (!row.assignedAgent) return false;
+        if (row.assignedAgent.call_center !== 'Vendamolo') return false;
+      }
+
       return true;
     });
 
@@ -366,10 +370,6 @@ export function Monitoring() {
         title: 'Search Completed',
         text: `Found ${data.length || 0} assignments.`,
       });
-
-      console.log('data--', data);
-      // 👉 AQUÍ puedes guardar resultados si quieres mostrarlos
-      // setAssignments(data);
 
       setOpenSearchAssignments(false);
 
@@ -535,16 +535,17 @@ export function Monitoring() {
                 <DocumentArrowDownIcon className="h-5 w-5" />
                 Export Excel
               </button>
-
-              <button
-                type="button"
-                onClick={() => setOpenSearchAssignments(true)}
-                disabled={loading}
-                className={`flex items-center gap-2 rounded px-3 py-1 text-white transition
+              {![4, 5, 7].includes(user?.role_id) && (
+                <button
+                  type="button"
+                  onClick={() => setOpenSearchAssignments(true)}
+                  disabled={loading}
+                  className={`flex items-center gap-2 rounded px-3 py-1 text-white transition
                 ${loading ? 'cursor-not-allowed bg-gray-400' : 'bg-[#1A1A1A] hover:bg-[#000000]'}`}
-              >
-                Search Assignments
-              </button>
+                >
+                  Search Assignments
+                </button>
+              )}
             </div>
           </CardHeader>
           {openBulkAssign && (
@@ -833,7 +834,7 @@ export function Monitoring() {
               <table className="w-full min-w-[700px] table-fixed border-collapse border-2 border-[#1A1A1A]">
                 <thead className="sticky top-0 z-10 bg-[#e07721] text-white">
                   <tr className="relative text-center">
-                    {![4, 5].includes(user?.role_id) && (
+                    {![4, 5, 7].includes(user?.role_id) && (
                       <th
                         className="sticky left-0 z-20 border border-[#1A1A1A] bg-[#e07721] px-2 py-2"
                         style={{ width: '48px' }}
@@ -855,7 +856,7 @@ export function Monitoring() {
                       </th>
                     )}
                     <th
-                      className={`sticky ${![4, 5].includes(user?.role_id) ? 'left-[48px]' : 'left-0'} z-20 border border-[#1A1A1A] bg-[#e07721] px-4 py-2`}
+                      className={`sticky ${![4, 5, 7].includes(user?.role_id) ? 'left-[48px]' : 'left-0'} z-20 border border-[#1A1A1A] bg-[#e07721] px-4 py-2`}
                       style={{ width: '150px' }}
                     >
                       Case Number
@@ -879,7 +880,7 @@ export function Monitoring() {
                       Email
                     </th>
 
-                    {![4, 5].includes(user?.role_id) && (
+                    {![4, 5, 7].includes(user?.role_id) && (
                       <th
                         className="border border-[#1A1A1A] px-4 py-2"
                         style={{ width: '220px' }}
@@ -940,7 +941,7 @@ export function Monitoring() {
                       )}
                     </th>
 
-                    {![4, 5].includes(user?.role_id) && (
+                    {![4, 5, 7].includes(user?.role_id) && (
                       <th
                         onClick={() => handleSort('attempts2')}
                         className="cursor-pointer border border-[#1A1A1A] px-4 py-2 hover:bg-[#d46f1d]"
@@ -954,7 +955,7 @@ export function Monitoring() {
                         )}
                       </th>
                     )}
-                    {![4, 5].includes(user?.role_id) && (
+                    {![4, 5, 7].includes(user?.role_id) && (
                       <th
                         onClick={() => handleSort('attempts3')}
                         className="cursor-pointer border border-[#1A1A1A] px-4 py-2 hover:bg-[#d46f1d]"
@@ -968,7 +969,7 @@ export function Monitoring() {
                         )}
                       </th>
                     )}
-                    {![4, 5].includes(user?.role_id) && (
+                    {![4, 5, 7].includes(user?.role_id) && (
                       <th
                         onClick={() => handleSort('totalAttempts')}
                         className="cursor-pointer border border-[#1A1A1A] px-4 py-2 hover:bg-[#d46f1d]"
@@ -1006,7 +1007,7 @@ export function Monitoring() {
     ${selectedCaseNumbers.includes(row.caseNumber) ? 'bg-indigo-100' : ''}
   `}
                       >
-                        {![4, 5].includes(user?.role_id) && (
+                        {![4, 5, 7].includes(user?.role_id) && (
                           <td
                             className="cursor-pointer border border-[#1A1A1A] bg-inherit px-2 py-2 text-center align-middle"
                             onClick={(e) =>
@@ -1024,7 +1025,7 @@ export function Monitoring() {
                           </td>
                         )}
                         <td
-                          className={`sticky ${![4, 5].includes(user?.role_id) ? 'left-[48px]' : 'left-0'} z-10 border border-[#1A1A1A] bg-inherit px-4 py-2 align-middle`}
+                          className={`sticky ${![4, 5, 7].includes(user?.role_id) ? 'left-[48px]' : 'left-0'} z-10 border border-[#1A1A1A] bg-inherit px-4 py-2 align-middle`}
                         >
                           {row.caseId ? (
                             <button
@@ -1054,7 +1055,7 @@ export function Monitoring() {
                         <td className="truncate border border-[#1A1A1A] px-4 py-2 text-center align-middle">
                           {row.email ?? '-'}
                         </td>
-                        {![4, 5].includes(user?.role_id) && (
+                        {![4, 5, 7].includes(user?.role_id) && (
                           <td className="truncate border border-[#1A1A1A] px-4 py-2 text-center align-middle">
                             {row.caseId ?? '-'}
                           </td>
@@ -1079,7 +1080,7 @@ export function Monitoring() {
                           <AgentCell
                             row={row}
                             onUpdated={fetchMonitoring}
-                            isEditable={![4, 5].includes(user?.role_id)}
+                            isEditable={![4, 5, 7].includes(user?.role_id)}
                           />
                         </td>
                         <td className="border border-[#1A1A1A] px-4 py-2 text-center align-middle">
@@ -1095,7 +1096,7 @@ export function Monitoring() {
                           </span>
                         </td>
 
-                        {![4, 5].includes(user?.role_id) && (
+                        {![4, 5, 7].includes(user?.role_id) && (
                           <td className="border border-[#1A1A1A] px-4 py-2 text-center align-middle">
                             <span
                               className={`inline-block min-w-[40px] rounded px-2 py-1 font-semibold ${getAttemptClass(
@@ -1106,7 +1107,7 @@ export function Monitoring() {
                             </span>
                           </td>
                         )}
-                        {![4, 5].includes(user?.role_id) && (
+                        {![4, 5, 7].includes(user?.role_id) && (
                           <td className="border border-[#1A1A1A] px-4 py-2 text-center align-middle">
                             <span
                               className={`inline-block min-w-[40px] rounded px-2 py-1 font-semibold ${getAttemptClass(
@@ -1117,7 +1118,7 @@ export function Monitoring() {
                             </span>
                           </td>
                         )}
-                        {![4, 5].includes(user?.role_id) && (
+                        {![4, 5, 7].includes(user?.role_id) && (
                           <td className="border border-[#1A1A1A] px-4 py-2 text-center align-middle">
                             <span
                               className={`inline-block min-w-[40px] rounded px-2 py-1 font-semibold ${getAttemptClass(

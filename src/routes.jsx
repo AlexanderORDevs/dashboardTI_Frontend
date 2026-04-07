@@ -113,7 +113,7 @@ export const getRoutes = (user) => {
           page.name === 'Home' ||
           page.name === 'Infobip'
         );
-      } else if (user?.role_id === 5) {
+      } else if (user?.role_id === 5 || user?.role_id === 7) {
         return page.name === 'Monitoring' || page.name === 'Home';
       } else if (user?.role_id === 6) {
         return page.name === 'Digital Signature' || page.name === 'Home';
