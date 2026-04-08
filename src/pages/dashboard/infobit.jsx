@@ -50,9 +50,10 @@ export function Infobit() {
 
     if (!phoneNumber || phoneNumber.trim() === '') {
       errors.phoneNumber = 'Phone number is required';
-    } else if (phoneNumber.length < 10) {
-      errors.phoneNumber = 'Phone number must have 10 digits';
     }
+    //  else if (phoneNumber.length < 10) {
+    //   errors.phoneNumber = 'Phone number must have 10 digits';
+    // }
 
     if (!message || message.trim() === '') {
       errors.message = 'Message is required';
@@ -162,23 +163,23 @@ export function Infobit() {
                     <Input
                       id="phone"
                       type="text"
-                      placeholder="1234567890"
+                      placeholder="6505756584"
                       value={phoneNumber}
                       onChange={handlePhoneChange}
-                      maxLength="10"
+                      // maxLength="10"
                       className="pl-10"
                     />
                   </div>
-                  {fieldErrors.phoneNumber && (
+                  {/* {fieldErrors.phoneNumber && (
                     <p className="mt-1 text-xs font-medium text-red-600">
                       {fieldErrors.phoneNumber}
                     </p>
-                  )}
-                  {!fieldErrors.phoneNumber && (
+                  )} */}
+                  {/* {!fieldErrors.phoneNumber && (
                     <p className="mt-1 text-xs text-gray-500">
                       Maximum 10 digits (U.S. numbers only)
                     </p>
-                  )}
+                  )} */}
                 </div>
               </div>
 

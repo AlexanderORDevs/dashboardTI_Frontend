@@ -1,16 +1,18 @@
 import { Routes, Route } from 'react-router-dom';
 import { Sidenav, Footer, Topnav } from '@/widgets/layout';
+import ChatbotWidget from '@/components/chatbot/ChatbotWidget';
 import { getRoutes } from '@/routes';
 import { useMaterialTailwindController } from '@/context';
 import { useAuth } from '@/context/loginContext';
 
 export function Dashboard() {
   const [controller] = useMaterialTailwindController();
-  const { sidenavType, openSidenav } = controller;
+  const { sidenavType } = controller;
   const sidenavColor = 'from-orange-400 to-orange-600';
   const { user } = useAuth();
 
   const routes = getRoutes(user);
+  const canSeeChatbot = user?.role_id === 1 || Number(user?.id) === 26;
 
   return (
     <div className="flex min-h-screen">
@@ -33,7 +35,7 @@ export function Dashboard() {
               ({ layout, pages }) =>
                 layout === 'dashboard' &&
                 pages.map(({ path, element }) => (
-                  <Route exact path={path} element={element} />
+                  <Route key={path} exact path={path} element={element} />
                 ))
             )}
           </Routes>
@@ -43,6 +45,8 @@ export function Dashboard() {
           <Footer />
         </div>
       </div>
+
+      {canSeeChatbot && <ChatbotWidget />}
     </div>
   );
 }
