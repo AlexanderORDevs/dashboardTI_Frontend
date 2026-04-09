@@ -12,7 +12,8 @@ export function Dashboard() {
   const { user } = useAuth();
 
   const routes = getRoutes(user);
-  const canSeeChatbot = user?.role_id === 1 || Number(user?.id) === 26;
+  const canSeeChatbot =
+    user?.role_id === 1 || Number(user?.id) === 26 || Number(user?.id) === 77;
 
   return (
     <div className="flex min-h-screen">
