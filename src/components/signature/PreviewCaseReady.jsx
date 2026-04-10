@@ -6,11 +6,11 @@ export function PreviewCaseReady({ fullname, position, phoneNumber, email }) {
   const [certificationImg, setCertificationImg] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const CANVAS_WIDTH = 1550;
-  const CANVAS_HEIGHT = 482;
+  const CANVAS_WIDTH = 1450;
+  const CANVAS_HEIGHT = 438;
 
   const containerRef = useRef(null);
-  const [scale, setScale] = useState(0.7);
+  const [scale, setScale] = useState(0.9);
 
   useEffect(() => {
     async function loadImages() {
@@ -115,7 +115,7 @@ export function PreviewCaseReady({ fullname, position, phoneNumber, email }) {
                     <img
                       src={certificationImg}
                       crossOrigin="anonymous"
-                      className="mt-2 h-[180px]"
+                      className="mt-2 h-[140px]"
                       alt="Certifications"
                     />
                   )}
@@ -125,7 +125,7 @@ export function PreviewCaseReady({ fullname, position, phoneNumber, email }) {
 
             {/* FOOTER */}
             <div className="flex justify-end bg-white">
-              <div className="relative mt-4 flex h-[60px] w-[1450px] items-center justify-between bg-[#EEA11D] px-24 py-2 text-[25px] font-semibold text-white">
+              <div className="relative mt-2 flex h-[60px] w-[1350px] items-center justify-between bg-[#EEA11D] px-24 py-2 text-[25px] font-semibold text-white">
                 <span className="absolute left-2 top-2 h-28 w-16 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-br-3xl bg-white" />
                 <span className="ml-10">Peru: {phoneNumber}</span>
                 <span>{email}</span>
