@@ -40,12 +40,14 @@ export default function MonitoringFilters({
       />
 
       {/* ORIGIN */}
-      <MultiSelectFilter
-        label="Origin"
-        options={uniqueValues('origin')}
-        value={filters.filterOrigin}
-        onChange={setters.setFilterOrigin}
-      />
+      {user?.role_id !== 9 && (
+        <MultiSelectFilter
+          label="Origin"
+          options={uniqueValues('origin')}
+          value={filters.filterOrigin}
+          onChange={setters.setFilterOrigin}
+        />
+      )}
 
       {/* TYPE */}
       <MultiSelectFilter

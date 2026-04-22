@@ -52,7 +52,7 @@ export function Home() {
   const [isLoadingAttempts, setIsLoadingAttempts] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  const restrictedRoles = [4, 5, 7, 8];
+  const restrictedRoles = [4, 5, 7, 8, 9];
   const isRestrictedRole = restrictedRoles.includes(user?.role_id);
 
   useEffect(() => {

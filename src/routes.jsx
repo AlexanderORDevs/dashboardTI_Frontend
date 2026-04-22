@@ -121,6 +121,8 @@ export const getRoutes = (user) => {
         return page.name === 'Monitoring' || page.name === 'Home';
       } else if (user?.role_id === 6) {
         return page.name === 'Digital Signature' || page.name === 'Home';
+      } else if (user?.role_id === 9) {
+        return page.name === 'Monitoring' || page.name === 'Home';
       }
 
       return true;

@@ -67,8 +67,22 @@ const getPeruDateString = () => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
+const ROLE_9_ALLOWED_ORIGINS = [
+  'Campaign_k',
+  'Inbound Digital',
+  'Buffer calls',
+];
+
+const normalizeOrigin = (value) => String(value ?? '').trim();
+
+const ROLE_9_ALLOWED_ORIGINS_NORMALIZED =
+  ROLE_9_ALLOWED_ORIGINS.map(normalizeOrigin);
+
 export function Monitoring() {
   const { user } = useAuth();
+  const isRole9 = user?.role_id === 9;
+  const canAssignAgents = ![4, 5, 7, 8, 9].includes(user?.role_id);
+  const hideExtendedColumns = [4, 5, 7, 8].includes(user?.role_id);
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(false);
   const [lastSelectedIndex, setLastSelectedIndex] = useState(null);
@@ -208,7 +222,22 @@ export function Monitoring() {
   }, []);
 
   useEffect(() => {
+    if (isRole9) {
+      setFilterOrigin(ROLE_9_ALLOWED_ORIGINS);
+    }
+  }, [isRole9]);
+
+  useEffect(() => {
     const result = cases.filter((row) => {
+      const rowOriginNormalized = normalizeOrigin(row.origin);
+
+      if (
+        isRole9 &&
+        !ROLE_9_ALLOWED_ORIGINS_NORMALIZED.includes(rowOriginNormalized)
+      ) {
+        return false;
+      }
+
       if (filterOrigin.length > 0 && !filterOrigin.includes(row.origin)) {
         return false;
       }
@@ -293,6 +322,7 @@ export function Monitoring() {
     filterAgentId,
     attemptColorFilter,
     attemptSource,
+    isRole9,
   ]);
 
   useEffect(() => {
@@ -307,7 +337,7 @@ export function Monitoring() {
   }, []);
 
   const clearFilters = () => {
-    setFilterOrigin([]);
+    setFilterOrigin(isRole9 ? ROLE_9_ALLOWED_ORIGINS : []);
     setFilterType([]);
     setFilterSubstatus([]);
     setFilterSupplierSegment([]);
@@ -462,9 +492,8 @@ export function Monitoring() {
       prev.includes(color) ? prev.filter((c) => c !== color) : [...prev, color]
     );
   };
-  const isRestricted = [4, 5].includes(user?.role_id);
-
-  const colSpan = isRestricted ? 12 : 16;
+  const colSpan =
+    12 + (hideExtendedColumns ? 0 : 4) + (canAssignAgents ? 1 : 0);
 
   const colorStats = useMemo(() => {
     const stats = { red: 0, yellow: 0, green: 0 };
@@ -726,7 +755,7 @@ export function Monitoring() {
               user={user}
             />
           </CardBody>
-          {selectedCaseNumbers.length > 0 && (
+          {canAssignAgents && selectedCaseNumbers.length > 0 && (
             <BulkActionsBar
               count={selectedCaseNumbers.length}
               onAssign={() => setOpenBulkAssign(true)}
@@ -837,7 +866,7 @@ export function Monitoring() {
               <table className="w-full min-w-[700px] table-fixed border-collapse border-2 border-[#1A1A1A]">
                 <thead className="sticky top-0 z-10 bg-[#e07721] text-white">
                   <tr className="relative text-center">
-                    {![4, 5, 7, 8].includes(user?.role_id) && (
+                    {canAssignAgents && (
                       <th
                         className="sticky left-0 z-20 border border-[#1A1A1A] bg-[#e07721] px-2 py-2"
                         style={{ width: '48px' }}
@@ -859,7 +888,7 @@ export function Monitoring() {
                       </th>
                     )}
                     <th
-                      className={`sticky ${![4, 5, 7, 8].includes(user?.role_id) ? 'left-[48px]' : 'left-0'} z-20 border border-[#1A1A1A] bg-[#e07721] px-4 py-2`}
+                      className={`sticky ${canAssignAgents ? 'left-[48px]' : 'left-0'} z-20 border border-[#1A1A1A] bg-[#e07721] px-4 py-2`}
                       style={{ width: '150px' }}
                     >
                       Case Number
@@ -1010,7 +1039,7 @@ export function Monitoring() {
     ${selectedCaseNumbers.includes(row.caseNumber) ? 'bg-indigo-100' : ''}
   `}
                       >
-                        {![4, 5, 7, 8].includes(user?.role_id) && (
+                        {canAssignAgents && (
                           <td
                             className="cursor-pointer border border-[#1A1A1A] bg-inherit px-2 py-2 text-center align-middle"
                             onClick={(e) =>
@@ -1028,7 +1057,7 @@ export function Monitoring() {
                           </td>
                         )}
                         <td
-                          className={`sticky ${![4, 5, 7, 8].includes(user?.role_id) ? 'left-[48px]' : 'left-0'} z-10 border border-[#1A1A1A] bg-inherit px-4 py-2 align-middle`}
+                          className={`sticky ${canAssignAgents ? 'left-[48px]' : 'left-0'} z-10 border border-[#1A1A1A] bg-inherit px-4 py-2 align-middle`}
                         >
                           {row.caseId ? (
                             <button
@@ -1083,7 +1112,7 @@ export function Monitoring() {
                           <AgentCell
                             row={row}
                             onUpdated={fetchMonitoring}
-                            isEditable={![4, 5, 7, 8].includes(user?.role_id)}
+                            isEditable={canAssignAgents}
                           />
                         </td>
                         <td className="border border-[#1A1A1A] px-4 py-2 text-center align-middle">

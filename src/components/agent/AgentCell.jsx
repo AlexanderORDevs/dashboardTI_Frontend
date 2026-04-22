@@ -29,7 +29,14 @@ export default function AgentCell({ row, onUpdated, isEditable = true }) {
           Select agent
         </button>
       ) : (
-        <span className="text-gray-500">-</span>
+        <button
+          type="button"
+          disabled
+          className="cursor-not-allowed rounded bg-gray-300 px-3 py-1 text-sm font-medium text-gray-600"
+          title="Not editable"
+        >
+          Select agent
+        </button>
       )}
 
       {open && (
