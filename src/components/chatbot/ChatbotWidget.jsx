@@ -3,6 +3,28 @@ import { useEffect, useState, useRef } from 'react';
 import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
 import { talkChatbot, getReportChatbot } from '@/services/chatbot';
 
+const normalizeMarkdownText = (value) => {
+  if (typeof value !== 'string') return '';
+
+  const normalized = value
+    .replaceAll('\r\n', '\n')
+    .replaceAll(/^\n+|\n+$/g, '');
+  const lines = normalized.split('\n');
+  const nonEmpty = lines.filter((line) => line.trim().length > 0);
+
+  if (!nonEmpty.length) return normalized;
+
+  const minIndent = nonEmpty.reduce((min, line) => {
+    const indentMatch = /^\s*/.exec(line);
+    const indent = (indentMatch ? indentMatch[0] : '').length;
+    return Math.min(min, indent);
+  }, Number.POSITIVE_INFINITY);
+
+  if (!Number.isFinite(minIndent) || minIndent === 0) return normalized;
+
+  return lines.map((line) => line.slice(minIndent)).join('\n');
+};
+
 export default function ChatbotWidget() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -35,7 +57,7 @@ export default function ChatbotWidget() {
           {
             id: 1,
             sender: 'bot',
-            text: fullText.slice(0, index),
+            text: normalizeMarkdownText(fullText.slice(0, index)),
           },
         ]);
 
@@ -96,11 +118,12 @@ export default function ChatbotWidget() {
       setMessages((prev) => [...prev, botMessage]);
 
       let index = 0;
-      const fullReply =
+      const fullReply = normalizeMarkdownText(
         response?.reply ||
-        response?.answer ||
-        response?.message ||
-        'No response received.';
+          response?.answer ||
+          response?.message ||
+          'No response received.'
+      );
 
       const typingInterval = setInterval(() => {
         index++;
