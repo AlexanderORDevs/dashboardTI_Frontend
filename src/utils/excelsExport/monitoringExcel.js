@@ -15,6 +15,7 @@ export function monitoringReport(data, fileName = 'monitoring.xlsx') {
     Substatus: row.substatus,
     Agent: row?.assignedAgent?.fullname ?? 'Unassigned',
     'Agent Group': row.assignedAgent?.call_center ?? 'Unassigned',
+    'Created Date': row.createdDate,
     'Attempts Today': row.attempts1,
     'Attempts Yesterday': row.attempts2,
     'Attempts 2 Days Ago': row.attempts3,
