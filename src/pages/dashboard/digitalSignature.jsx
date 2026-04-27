@@ -83,6 +83,7 @@ const generateAutoEmail = (fullname, selectedCompany) => {
 
 export function DigitalSignature() {
   const [selectedCompany, setSelectedCompany] = useState('IMG');
+  const [country, setCountry] = useState('Peru');
   const [formValues, setFormValues] = useState({
     fullname: '',
     position: '',
@@ -120,6 +121,7 @@ export function DigitalSignature() {
   const handleCompanyChange = (event) => {
     const newCompany = event.target.value;
     setSelectedCompany(newCompany);
+    setCountry('Peru');
 
     setFormValues((prev) => ({
       ...prev,
@@ -167,6 +169,7 @@ export function DigitalSignature() {
         email: companyDesigns[selectedCompany].email,
       }));
       setFormErrors({});
+      setCountry('Peru');
     } catch (error) {
       console.error('Critical Error', error);
     }
@@ -177,6 +180,7 @@ export function DigitalSignature() {
     position: formValues.position || 'Position',
     phoneNumber: formValues.phoneNumber,
     email: formValues.email,
+    country: country,
   };
 
   const PreviewComponent = {
@@ -229,6 +233,24 @@ export function DigitalSignature() {
                     ))}
                   </select>
                 </div>
+
+                {/* Select Country */}
+                {(selectedCompany === 'IMG' ||
+                  selectedCompany === 'CASEREADY') && (
+                  <div className="flex flex-col">
+                    <label className="mb-2 block font-semibold text-white">
+                      Country:
+                    </label>
+                    <select
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      className="rounded-lg p-1 pl-9"
+                    >
+                      <option value="Peru">Peru</option>
+                      <option value="USA">USA</option>
+                    </select>
+                  </div>
+                )}
 
                 <form
                   className="rounded-lg bg-white shadow-hard-gray"

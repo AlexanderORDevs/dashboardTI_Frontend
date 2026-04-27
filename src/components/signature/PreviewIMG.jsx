@@ -14,7 +14,13 @@ const toImg360Proxy = (url) => {
   );
 };
 
-export function PreviewIMG({ fullname, position, phoneNumber, email }) {
+export function PreviewIMG({
+  fullname,
+  position,
+  phoneNumber,
+  email,
+  country = 'Peru',
+}) {
   const [logoImg, setLogoImg] = useState(null);
   const [certificationImg, setCertificationImg] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -135,7 +141,9 @@ export function PreviewIMG({ fullname, position, phoneNumber, email }) {
             <div className="flex justify-end bg-white">
               <div className="relative mt-2 flex h-[60px] w-[1200px] items-center justify-between bg-[#EEA11D] px-24 py-2 text-[25px] font-semibold text-white">
                 <span className="absolute left-2 top-2 h-28 w-16 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-br-3xl bg-white" />
-                <span className="ml-10">Peru: {phoneNumber}</span>
+                <span className="ml-10">
+                  {country}: {phoneNumber}
+                </span>
                 <span>{email}</span>
                 <span className="mr-5">www.img360.com</span>
               </div>

@@ -1,12 +1,18 @@
 import { useEffect, useState, useRef } from 'react';
 import { getDigitalSignatureById } from '@/services/digitalSignature/getDigitalSignature';
 
-export function PreviewCaseReady({ fullname, position, phoneNumber, email }) {
+export function PreviewCaseReady({
+  fullname,
+  position,
+  phoneNumber,
+  email,
+  country = 'Peru',
+}) {
   const [logoImg, setLogoImg] = useState(null);
   const [certificationImg, setCertificationImg] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const CANVAS_WIDTH = 1450;
+  const CANVAS_WIDTH = 1350;
   const CANVAS_HEIGHT = 438;
 
   const containerRef = useRef(null);
@@ -115,7 +121,7 @@ export function PreviewCaseReady({ fullname, position, phoneNumber, email }) {
                     <img
                       src={certificationImg}
                       crossOrigin="anonymous"
-                      className="mt-2 h-[140px]"
+                      className="mt-2 h-[120px]"
                       alt="Certifications"
                     />
                   )}
@@ -125,9 +131,11 @@ export function PreviewCaseReady({ fullname, position, phoneNumber, email }) {
 
             {/* FOOTER */}
             <div className="flex justify-end bg-white">
-              <div className="relative mt-2 flex h-[60px] w-[1350px] items-center justify-between bg-[#EEA11D] px-24 py-2 text-[25px] font-semibold text-white">
+              <div className="relative mt-2 flex h-[60px] w-[1200px] items-center justify-between bg-[#EEA11D] px-24 py-2 text-[25px] font-semibold text-white">
                 <span className="absolute left-2 top-2 h-28 w-16 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-br-3xl bg-white" />
-                <span className="ml-10">Peru: {phoneNumber}</span>
+                <span className="ml-10">
+                  {country}: {phoneNumber}
+                </span>
                 <span>{email}</span>
                 <span className="mr-5">www.casereadyintake.com</span>
               </div>
