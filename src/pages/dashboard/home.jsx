@@ -306,6 +306,10 @@ export function Home() {
       const supplier =
         item['SUPPLIER'] || item['Supplier'] || item.supplier || 'Unknown';
       const type = item['TYPE'] || item['Type'] || item.type || 'Unknown';
+      const status =
+        item['STATUS'] || item['Status'] || item.status || 'Unknown';
+      const substatus =
+        item['SUBSTATUS'] || item['Substatus'] || item.substatus || 'Unknown';
       const attempts = Number(
         item.ATTEMPTS ?? item.Attempts ?? item.attempts ?? 0
       );
@@ -349,6 +353,8 @@ export function Home() {
           hours: {},
           suppliers: {},
           types: {},
+          statuses: {},
+          substatuses: {},
         };
       }
 
@@ -358,6 +364,9 @@ export function Home() {
       phoneData.suppliers[supplier] =
         (phoneData.suppliers[supplier] || 0) + attempts;
       phoneData.types[type] = (phoneData.types[type] || 0) + attempts;
+      phoneData.statuses[status] = (phoneData.statuses[status] || 0) + attempts;
+      phoneData.substatuses[substatus] =
+        (phoneData.substatuses[substatus] || 0) + attempts;
 
       if (!supplierData.phones[phoneNumber]) {
         supplierData.phones[phoneNumber] = {
@@ -365,6 +374,8 @@ export function Home() {
           hours: {},
           agents: {},
           types: {},
+          statuses: {},
+          substatuses: {},
           agentHours: {},
         };
       }
@@ -377,6 +388,10 @@ export function Home() {
         (supplierPhoneData.agents[agent] || 0) + attempts;
       supplierPhoneData.types[type] =
         (supplierPhoneData.types[type] || 0) + attempts;
+      supplierPhoneData.statuses[status] =
+        (supplierPhoneData.statuses[status] || 0) + attempts;
+      supplierPhoneData.substatuses[substatus] =
+        (supplierPhoneData.substatuses[substatus] || 0) + attempts;
 
       if (!supplierPhoneData.agentHours[hour]) {
         supplierPhoneData.agentHours[hour] = {};
@@ -1162,6 +1177,14 @@ export function Home() {
                     phoneData.types,
                     Number.MAX_SAFE_INTEGER
                   );
+                  const statuses = getTopBreakdown(
+                    phoneData.statuses,
+                    Number.MAX_SAFE_INTEGER
+                  );
+                  const substatuses = getTopBreakdown(
+                    phoneData.substatuses,
+                    Number.MAX_SAFE_INTEGER
+                  );
                   const agents = getTopBreakdown(
                     phoneData.agents,
                     Number.MAX_SAFE_INTEGER
@@ -1172,29 +1195,57 @@ export function Home() {
                       <CardBody>
                         {!isSupplierView && (
                           <>
-                            <Typography className="text-slate-500 mb-1 text-xs">
-                              Supplier:{' '}
-                              {suppliers.length
-                                ? suppliers.join(', ')
-                                : 'Unknown'}
-                            </Typography>
-                            <Typography className="text-slate-500 mb-3 text-xs">
-                              Type:{' '}
-                              {types.length ? types.join(', ') : 'Unknown'}
-                            </Typography>
+                            <div className="mb-3 grid grid-cols-1 gap-x-4 gap-y-1 sm:grid-cols-2">
+                              <Typography className="text-slate-500 text-xs">
+                                Supplier:{' '}
+                                {suppliers.length
+                                  ? suppliers.join(', ')
+                                  : 'Unknown'}
+                              </Typography>
+                              <Typography className="text-slate-500 text-xs">
+                                Type:{' '}
+                                {types.length ? types.join(', ') : 'Unknown'}
+                              </Typography>
+                              <Typography className="text-slate-500 text-xs">
+                                Status:{' '}
+                                {statuses.length
+                                  ? statuses.join(', ')
+                                  : 'Unknown'}
+                              </Typography>
+                              <Typography className="text-slate-500 text-xs">
+                                Substatus:{' '}
+                                {substatuses.length
+                                  ? substatuses.join(', ')
+                                  : 'Unknown'}
+                              </Typography>
+                            </div>
                           </>
                         )}
 
                         {isSupplierView && (
                           <>
-                            <Typography className="text-slate-500 mb-1 text-xs">
-                              Agents:{' '}
-                              {agents.length ? agents.join(', ') : 'Unknown'}
-                            </Typography>
-                            <Typography className="text-slate-500 mb-3 text-xs">
-                              Type:{' '}
-                              {types.length ? types.join(', ') : 'Unknown'}
-                            </Typography>
+                            <div className="mb-3 grid grid-cols-1 gap-x-4 gap-y-1 sm:grid-cols-2">
+                              <Typography className="text-slate-500 text-xs">
+                                Agents:{' '}
+                                {agents.length ? agents.join(', ') : 'Unknown'}
+                              </Typography>
+                              <Typography className="text-slate-500 text-xs">
+                                Type:{' '}
+                                {types.length ? types.join(', ') : 'Unknown'}
+                              </Typography>
+                              <Typography className="text-slate-500 text-xs">
+                                Status:{' '}
+                                {statuses.length
+                                  ? statuses.join(', ')
+                                  : 'Unknown'}
+                              </Typography>
+                              <Typography className="text-slate-500 text-xs">
+                                Substatus:{' '}
+                                {substatuses.length
+                                  ? substatuses.join(', ')
+                                  : 'Unknown'}
+                              </Typography>
+                            </div>
                           </>
                         )}
 
