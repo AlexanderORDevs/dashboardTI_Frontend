@@ -10,7 +10,6 @@ import {
 } from '@heroicons/react/24/solid';
 import {
   Home,
-  LandingTemplates,
   CreateRegister,
   Users,
   Monitoring,
@@ -33,13 +32,6 @@ const allRoutes = [
         name: 'Home',
         path: '/home',
         element: <Home />,
-      },
-      // Landing Manager
-      {
-        icon: <DocumentDuplicateIcon {...icon} />,
-        name: 'Landing Template',
-        path: '/landingTemplate',
-        element: <LandingTemplates />,
       },
       {
         icon: <ServerStackIcon {...icon} />,
